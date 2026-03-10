@@ -40,10 +40,14 @@ bool TerrainShaderClass::Render(
 	ID3D11ShaderResourceView* normalMap,
 	ID3D11ShaderResourceView* normalMap2,
 	ID3D11ShaderResourceView* normalMap3,
+	ID3D11ShaderResourceView* grassTexture,
+	ID3D11ShaderResourceView* grassNormalMap,
 	XMFLOAT3 lightDirection,
 	XMFLOAT4 diffuseColor)
 {
-	if (!SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, normalMap, normalMap2, normalMap3, lightDirection, diffuseColor)) {
+	if (!SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix,
+		texture, normalMap, normalMap2, normalMap3, grassTexture, grassNormalMap,
+		lightDirection, diffuseColor)) {
 		return false;
 	}
 
@@ -89,10 +93,9 @@ bool TerrainShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 		return false;
 	}
 
-
 	if (FAILED(device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &m_vertexShader)) ||
 		FAILED(device->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, &m_pixelShader))
-	) {
+		) {
 		return false;
 	}
 
@@ -176,9 +179,9 @@ bool TerrainShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	}
 
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.MipLODBias = 0.0f;
 	samplerDesc.MaxAnisotropy = 1;
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
@@ -214,9 +217,9 @@ void TerrainShaderClass::ShutdownShader()
 		m_lightBuffer = NULL;
 	}
 
-	if (m_lightBuffer) {
-		m_lightBuffer->Release();
-		m_lightBuffer = NULL;
+	if (m_sampleState) {
+		m_sampleState->Release();
+		m_sampleState = NULL;
 	}
 
 	if (m_matrixBuffer) {
@@ -276,6 +279,8 @@ bool TerrainShaderClass::SetShaderParameters(
 	ID3D11ShaderResourceView* normalMap,
 	ID3D11ShaderResourceView* normalMap2,
 	ID3D11ShaderResourceView* normalMap3,
+	ID3D11ShaderResourceView* grassTexture,
+	ID3D11ShaderResourceView* grassNormalMap,
 	XMFLOAT3 lightDirection,
 	XMFLOAT4 diffuseColor)
 {
@@ -301,13 +306,15 @@ bool TerrainShaderClass::SetShaderParameters(
 	deviceContext->Unmap(m_matrixBuffer, 0);
 
 	bufferNumber = 0;
-
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
-	deviceContext->PSSetShaderResources(0, 1, &texture);
-	deviceContext->PSSetShaderResources(1, 1, &normalMap);
-	deviceContext->PSSetShaderResources(2, 1, &normalMap2);
-	deviceContext->PSSetShaderResources(3, 1, &normalMap3);
+	// Bind all 6 textures
+	ID3D11ShaderResourceView* textures[6] = {
+			texture, normalMap, normalMap2, normalMap3,
+			grassTexture, grassNormalMap
+	};
+	deviceContext->PSSetShaderResources(0, 6, textures);
+	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
 
 	if (FAILED(deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) {
 		return false;
@@ -322,7 +329,6 @@ bool TerrainShaderClass::SetShaderParameters(
 	deviceContext->Unmap(m_lightBuffer, 0);
 
 	bufferNumber = 0;
-
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
 
 	return true;
@@ -334,8 +340,6 @@ void TerrainShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int in
 
 	deviceContext->VSSetShader(m_vertexShader, NULL, 0);
 	deviceContext->PSSetShader(m_pixelShader, NULL, 0);
-
-	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
 
 	deviceContext->DrawIndexed(indexCount, 0, 0);
 

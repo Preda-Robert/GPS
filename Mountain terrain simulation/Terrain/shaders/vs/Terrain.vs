@@ -26,16 +26,20 @@ struct PixelInputType
 	float4 color : COLOR;
 	float2 tex2 : TEXCOORD1;
 	float4 depthPosition : TEXCOORD2;
+	float3 worldPosition : TEXCOORD3;  
 };
 
 PixelInputType TerrainVertexShader(VertexInputType input)
 {
 	PixelInputType output;
+	float4 worldPos;
 
 	input.position.w = 1.0f;
 
-	output.position = mul(input.position, worldMatrix);
-	output.position = mul(output.position, viewMatrix);
+	worldPos = mul(input.position, worldMatrix);
+	output.worldPosition = worldPos.xyz;  
+
+	output.position = mul(worldPos, viewMatrix);
 	output.position = mul(output.position, projectionMatrix);
 
 	output.tex = input.tex;

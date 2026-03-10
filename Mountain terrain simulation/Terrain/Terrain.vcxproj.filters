@@ -111,6 +111,15 @@
     <ClCompile Include="MinimapClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SkyboxClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyboxShaderClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CubemapClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PositionClass.h">
@@ -197,6 +206,15 @@
     <ClInclude Include="FontShaderClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SkyboxClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyboxShaderClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CubemapClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\ps\Color.ps">
@@ -235,5 +253,13 @@
     <None Include="shaders\vs\Texture.vs">
       <Filter>Shader Files\vs</Filter>
     </None>
+    <None Include="Skybox.ps">
+      <Filter>Shader Files\ps</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="Skybox.vs">
+      <Filter>Shader Files\vs</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

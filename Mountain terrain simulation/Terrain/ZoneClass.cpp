@@ -8,6 +8,8 @@ ZoneClass::ZoneClass()
 	m_Position = NULL;
 	m_Frustum = NULL;
 	m_SkyDome = NULL;
+	m_Skybox = NULL;     
+	m_Cubemap = NULL;    
 	m_Terrain = NULL;
 	m_displayUI = false; // F1
 	m_wireFrame = false; // F2
@@ -28,6 +30,8 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 	m_Position = new PositionClass();
 	m_Frustum = new FrustumClass();
 	m_SkyDome = new SkyDomeClass();
+	m_Skybox = new SkyboxClass();   
+	m_Cubemap = new CubemapClass();  
 	m_Terrain = new TerrainClass();
 
 	if (!m_UserInterface ||
@@ -36,9 +40,11 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 		!m_Position ||
 		!m_Frustum ||
 		!m_SkyDome ||
+		!m_Skybox ||     
+		!m_Cubemap ||     
 		!m_Terrain ||
 		!m_UserInterface->Initialize(direct3D, screenHeight, screenWidth)
-	) {
+		) {
 		return false;
 	}
 
@@ -49,15 +55,22 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
 	m_Light->SetDirection(-0.5f, -1.0f, -0.5f);
 
-	// Terrain.vs: input.position.w = 1.0f
 	m_Position->SetPosition(16.0f, 78.0f, 565.0f);
 	m_Position->SetRotation(13.0f, 89.0f, 0.0f);
 
 	m_Frustum->Initialize(screenDepth);
 
 	if (!m_SkyDome->Initialize(direct3D->GetDevice()) ||
+		!m_Skybox->Initialize(direct3D->GetDevice()) ||
+		!m_Cubemap->Initialize(direct3D->GetDevice(), direct3D->GetDeviceContext(),
+			"data/skybox/right.tga",  
+			"data/skybox/left.tga",  
+			"data/skybox/top.tga",     
+			"data/skybox/bottom.tga",  
+			"data/skybox/front.tga",  
+			"data/skybox/back.tga") || 
 		!m_Terrain->Initialize(direct3D->GetDevice(), "data/Setup.txt")
-	) {
+		) {
 		return false;
 	}
 
@@ -70,6 +83,18 @@ void ZoneClass::Shutdown()
 		m_Terrain->Shutdown();
 		delete m_Terrain;
 		m_Terrain = NULL;
+	}
+
+	if (m_Cubemap) {
+		m_Cubemap->Shutdown();
+		delete m_Cubemap;
+		m_Cubemap = NULL;
+	}
+
+	if (m_Skybox) {
+		m_Skybox->Shutdown();
+		delete m_Skybox;
+		m_Skybox = NULL;
 	}
 
 	if (m_SkyDome) {
@@ -228,18 +253,17 @@ bool ZoneClass::Render(D3DClass* direct3D, ShaderManagerClass* shaderManager, Te
 	direct3D->TurnOffCulling();
 	direct3D->TurnZBufferOff();
 
-	worldMatrix = XMMatrixTranslation(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+	worldMatrix = XMMatrixScaling(500.0f, 500.0f, 500.0f);
 
-	m_SkyDome->Render(direct3D->GetDeviceContext());
+	m_Skybox->Render(direct3D->GetDeviceContext());
 
-	result = shaderManager->RenderSkyDomeShader(
+	result = shaderManager->RenderSkyboxShader(
 		direct3D->GetDeviceContext(),
-		m_SkyDome->GetIndexCount(),
+		m_Skybox->GetIndexCount(),
 		worldMatrix,
 		viewMatrix,
 		projectionMatrix,
-		m_SkyDome->GetApexColor(),
-		m_SkyDome->GetCenterColor()
+		m_Cubemap->GetTexture()
 	);
 
 	if (!result) {
@@ -247,7 +271,6 @@ bool ZoneClass::Render(D3DClass* direct3D, ShaderManagerClass* shaderManager, Te
 	}
 
 	direct3D->GetWorldMatrix(worldMatrix);
-
 	direct3D->TurnZBufferOn();
 	direct3D->TurnOnCulling();
 
@@ -263,10 +286,12 @@ bool ZoneClass::Render(D3DClass* direct3D, ShaderManagerClass* shaderManager, Te
 				worldMatrix,
 				viewMatrix,
 				projectionMatrix,
-				textureManager->GetTexture(0),
-				textureManager->GetTexture(1),
-				textureManager->GetTexture(2),
-				textureManager->GetTexture(3),
+				textureManager->GetTexture(0),  
+				textureManager->GetTexture(1), 
+				textureManager->GetTexture(2),  
+				textureManager->GetTexture(3),  
+				textureManager->GetTexture(4),  
+				textureManager->GetTexture(5), 
 				m_Light->GetDirection(),
 				m_Light->GetDiffuseColor()
 			);
@@ -278,7 +303,8 @@ bool ZoneClass::Render(D3DClass* direct3D, ShaderManagerClass* shaderManager, Te
 			if (m_cellLines) {
 				m_Terrain->RenderCellLines(direct3D->GetDeviceContext(), i);
 
-				if (!shaderManager->RenderColorShader(direct3D->GetDeviceContext(), m_Terrain->GetCellLinesIndexCount(i), worldMatrix, viewMatrix, projectionMatrix)) {
+				if (!shaderManager->RenderColorShader(direct3D->GetDeviceContext(),
+					m_Terrain->GetCellLinesIndexCount(i), worldMatrix, viewMatrix, projectionMatrix)) {
 					return false;
 				}
 			}
@@ -289,7 +315,8 @@ bool ZoneClass::Render(D3DClass* direct3D, ShaderManagerClass* shaderManager, Te
 		direct3D->DisableWireframe();
 	}
 
-	if (!m_UserInterface->UpdateRenderCounts(direct3D->GetDeviceContext(), m_Terrain->GetRenderCount(), m_Terrain->GetCellsDrawn(), m_Terrain->GetCellsCulled())) {
+	if (!m_UserInterface->UpdateRenderCounts(direct3D->GetDeviceContext(),
+		m_Terrain->GetRenderCount(), m_Terrain->GetCellsDrawn(), m_Terrain->GetCellsCulled())) {
 		return false;
 	}
 

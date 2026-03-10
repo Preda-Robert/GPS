@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -151,6 +151,7 @@
     <ClCompile Include="BitmapClass.cpp" />
     <ClCompile Include="CameraClass.cpp" />
     <ClCompile Include="ColorShaderClass.cpp" />
+    <ClCompile Include="CubemapClass.cpp" />
     <ClCompile Include="D3DClass.cpp" />
     <ClCompile Include="FontClass.cpp" />
     <ClCompile Include="FontShaderClass.cpp" />
@@ -163,6 +164,8 @@
     <ClCompile Include="MinimapClass.cpp" />
     <ClCompile Include="PositionClass.cpp" />
     <ClCompile Include="ShaderManagerClass.cpp" />
+    <ClCompile Include="SkyboxClass.cpp" />
+    <ClCompile Include="SkyboxShaderClass.cpp" />
     <ClCompile Include="SkyDomeClass.cpp" />
     <ClCompile Include="SkyDomeShaderClass.cpp" />
     <ClCompile Include="SystemClass.cpp" />
@@ -182,6 +185,7 @@
     <ClInclude Include="BitmapClass.h" />
     <ClInclude Include="CameraClass.h" />
     <ClInclude Include="ColorShaderClass.h" />
+    <ClInclude Include="CubemapClass.h" />
     <ClInclude Include="D3DClass.h" />
     <ClInclude Include="FontClass.h" />
     <ClInclude Include="FontShaderClass.h" />
@@ -193,6 +197,8 @@
     <ClInclude Include="MinimapClass.h" />
     <ClInclude Include="PositionClass.h" />
     <ClInclude Include="ShaderManagerClass.h" />
+    <ClInclude Include="SkyboxClass.h" />
+    <ClInclude Include="SkyboxShaderClass.h" />
     <ClInclude Include="SkyDomeClass.h" />
     <ClInclude Include="SkyDomeShaderClass.h" />
     <ClInclude Include="SystemClass.h" />
@@ -220,6 +226,10 @@
     <None Include="shaders\vs\SkyDome.vs" />
     <None Include="shaders\vs\Terrain.vs" />
     <None Include="shaders\vs\Texture.vs" />
+    <None Include="Skybox.ps" />
+    <CopyFileToFolders Include="Skybox.vs">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

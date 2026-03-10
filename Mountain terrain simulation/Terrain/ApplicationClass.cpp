@@ -40,9 +40,11 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 		!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/rock01n.tga", 1) ||
 		!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/snow01n.tga", 2) ||
 		!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/distance01n.tga", 3) ||
+!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/grass.tga", 4) || 
+!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/grass.tga", 5) ||
 		!m_Timer->Initialize() ||
 		!m_Zone->Initialize(m_Direct3D, hwnd, screenWidth, screenHeight, SCREEN_DEPTH)
-	) {
+		) {
 		return false;
 	}
 

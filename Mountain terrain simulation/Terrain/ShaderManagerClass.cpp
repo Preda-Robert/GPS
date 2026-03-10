@@ -8,6 +8,7 @@ ShaderManagerClass::ShaderManagerClass()
 	m_FontShader = NULL;
 	m_SkyDomeShader = NULL;
 	m_TerrainShader = NULL;
+	m_SkyboxShader = NULL;  
 }
 
 ShaderManagerClass::~ShaderManagerClass()
@@ -22,6 +23,7 @@ bool ShaderManagerClass::Initialize(ID3D11Device* device, HWND hwnd)
 	m_FontShader = new FontShaderClass();
 	m_SkyDomeShader = new SkyDomeShaderClass();
 	m_TerrainShader = new TerrainShaderClass();
+	m_SkyboxShader = new SkyboxShaderClass(); 
 
 	if (!m_ColorShader ||
 		!m_TextureShader ||
@@ -29,13 +31,15 @@ bool ShaderManagerClass::Initialize(ID3D11Device* device, HWND hwnd)
 		!m_FontShader ||
 		!m_SkyDomeShader ||
 		!m_TerrainShader ||
+		!m_SkyboxShader || 
 		!m_ColorShader->Initialize(device, hwnd) ||
 		!m_TextureShader->Initialize(device, hwnd) ||
 		!m_LightShader->Initialize(device, hwnd) ||
 		!m_FontShader->Initialize(device, hwnd) ||
 		!m_SkyDomeShader->Initialize(device, hwnd) ||
-		!m_TerrainShader->Initialize(device, hwnd)
-	) {
+		!m_TerrainShader->Initialize(device, hwnd) ||
+		!m_SkyboxShader->Initialize(device, hwnd) 
+		) {
 		return false;
 	}
 
@@ -44,6 +48,12 @@ bool ShaderManagerClass::Initialize(ID3D11Device* device, HWND hwnd)
 
 void ShaderManagerClass::Shutdown()
 {
+	if (m_SkyboxShader) {
+		m_SkyboxShader->Shutdown();
+		delete m_SkyboxShader;
+		m_SkyboxShader = NULL;
+	}
+
 	if (m_TerrainShader) {
 		m_TerrainShader->Shutdown();
 		delete m_TerrainShader;
@@ -79,8 +89,6 @@ void ShaderManagerClass::Shutdown()
 		delete m_ColorShader;
 		m_ColorShader = NULL;
 	}
-
-	return;
 }
 
 bool ShaderManagerClass::RenderColorShader(
@@ -189,20 +197,24 @@ bool ShaderManagerClass::RenderTerrainShader(
 	ID3D11ShaderResourceView* normalMap,
 	ID3D11ShaderResourceView* normalMap2,
 	ID3D11ShaderResourceView* normalMap3,
+	ID3D11ShaderResourceView* grassTexture,     // NEW
+	ID3D11ShaderResourceView* grassNormalMap,   // NEW
 	XMFLOAT3 lightDirection,
 	XMFLOAT4 diffuseColor)
 {
-	return m_TerrainShader->Render(
-		deviceContext,
-		indexCount,
-		worldMatrix,
-		viewMatrix,
-		projectionMatrix,
-		texture,
-		normalMap,
-		normalMap2,
-		normalMap3,
-		lightDirection,
-		diffuseColor
-	);
+	return m_TerrainShader->Render(deviceContext, indexCount, worldMatrix, viewMatrix, projectionMatrix,
+		texture, normalMap, normalMap2, normalMap3, grassTexture, grassNormalMap,
+		lightDirection, diffuseColor);
+}
+
+// NEW: RenderSkyboxShader
+bool ShaderManagerClass::RenderSkyboxShader(
+	ID3D11DeviceContext* deviceContext,
+	int indexCount,
+	XMMATRIX worldMatrix,
+	XMMATRIX viewMatrix,
+	XMMATRIX projectionMatrix,
+	ID3D11ShaderResourceView* cubemapTexture)
+{
+	return m_SkyboxShader->Render(deviceContext, indexCount, worldMatrix, viewMatrix, projectionMatrix, cubemapTexture);
 }
