@@ -1,0 +1,48 @@
+﻿  ApplicationClass.cpp
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+  BitmapClass.cpp
+  CameraClass.cpp
+  ColorShaderClass.cpp
+  D3DClass.cpp
+  FontClass.cpp
+  FontShaderClass.cpp
+  FpsClass.cpp
+  FrustumClass.cpp
+  InputClass.cpp
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+  LightClass.cpp
+  LightShaderClass.cpp
+  Main.cpp
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+  MinimapClass.cpp
+C:\Users\ivane\Desktop\Simulare teren zona muntoasa\Terrain\MinimapClass.cpp(102,22): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
+C:\Users\ivane\Desktop\Simulare teren zona muntoasa\Terrain\MinimapClass.cpp(103,22): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
+  PositionClass.cpp
+  ShaderManagerClass.cpp
+  SkyDomeClass.cpp
+  SkyDomeShaderClass.cpp
+  SystemClass.cpp
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+  TerrainCellClass.cpp
+  Generating Code...
+  Compiling...
+  TerrainClass.cpp
+  TerrainShaderClass.cpp
+  TextClass.cpp
+  TextureClass.cpp
+  TextureManagerClass.cpp
+  TextureShaderClass.cpp
+  TimerClass.cpp
+  UserInterfaceClass.cpp
+C:\Users\ivane\Desktop\Simulare teren zona muntoasa\Terrain\UserInterfaceClass.cpp(400,27): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\ivane\Desktop\Simulare teren zona muntoasa\Terrain\UserInterfaceClass.cpp(412,27): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\ivane\Desktop\Simulare teren zona muntoasa\Terrain\UserInterfaceClass.cpp(424,27): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\ivane\Desktop\Simulare teren zona muntoasa\Terrain\UserInterfaceClass.cpp(436,27): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\ivane\Desktop\Simulare teren zona muntoasa\Terrain\UserInterfaceClass.cpp(448,27): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\ivane\Desktop\Simulare teren zona muntoasa\Terrain\UserInterfaceClass.cpp(460,27): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\ivane\Desktop\Simulare teren zona muntoasa\Terrain\UserInterfaceClass.cpp(472,27): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\ivane\Desktop\Simulare teren zona muntoasa\Terrain\UserInterfaceClass.cpp(484,27): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+  ZoneClass.cpp
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+  Generating Code...
+  Terrain.vcxproj -> C:\Users\ivane\Desktop\Simulare teren zona muntoasa\x64\Debug\Terrain.exe

@@ -1,0 +1,10 @@
+﻿cl : command line  warning D9035: option 'Gm' has been deprecated and will be removed in a future release
+  Water.cpp
+  Terrain.cpp
+  Main.cpp
+  Init.cpp
+  CShader.cpp
+  Camera.cpp
+  Generating Code...
+Camera.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
+  GraphicalSystemsLaborator.vcxproj -> C:\Users\ivane\Desktop\Water Simulation 2\Debug\GraphicalSystemsLaborator.exe
