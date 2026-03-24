@@ -1,0 +1,31 @@
+Texture2D shaderTexture : register(t0);
+SamplerState SampleType : register(s0);
+
+cbuffer LightBuffer
+{
+    float4 diffuseColor;
+    float3 lightDirection;
+    float padding;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+};
+
+float4 ObjectPixelShader(PixelInputType input) : SV_TARGET
+{
+    float4 textureColor = shaderTexture.Sample(SampleType, input.tex);
+    
+    float3 lightDir = -normalize(lightDirection);
+    float lightIntensity = saturate(dot(input.normal, lightDir));
+    
+    // Add ambient light
+    float4 ambient = float4(0.2f, 0.2f, 0.2f, 1.0f);
+    float4 color = ambient + (diffuseColor * lightIntensity);
+    color = saturate(color);
+    
+    return color * textureColor;
+}

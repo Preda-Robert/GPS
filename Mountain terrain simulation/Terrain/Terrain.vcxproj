@@ -147,6 +147,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\Downloads\ObjectShaderClass.cpp" />
+    <ClCompile Include="..\..\..\..\Downloads\StaticObjectsClass.cpp" />
+    <ClCompile Include="..\..\..\..\Downloads\StreetCircuitClass.cpp" />
     <ClCompile Include="ApplicationClass.cpp" />
     <ClCompile Include="BitmapClass.cpp" />
     <ClCompile Include="CameraClass.cpp" />
@@ -181,6 +184,9 @@
     <ClCompile Include="ZoneClass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\Downloads\ObjectShaderClass.h" />
+    <ClInclude Include="..\..\..\..\Downloads\StaticObjectsClass.h" />
+    <ClInclude Include="..\..\..\..\Downloads\StreetCircuitClass.h" />
     <ClInclude Include="ApplicationClass.h" />
     <ClInclude Include="BitmapClass.h" />
     <ClInclude Include="CameraClass.h" />
@@ -214,6 +220,8 @@
     <ClInclude Include="ZoneClass.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\Downloads\Object.ps" />
+    <None Include="..\..\..\..\Downloads\Object.vs" />
     <None Include="shaders\ps\Color.ps" />
     <None Include="shaders\ps\Font.ps" />
     <None Include="shaders\ps\Light.ps" />

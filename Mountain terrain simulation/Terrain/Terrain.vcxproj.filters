@@ -120,6 +120,15 @@
     <ClCompile Include="CubemapClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Downloads\StaticObjectsClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Downloads\StreetCircuitClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Downloads\ObjectShaderClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PositionClass.h">
@@ -215,6 +224,15 @@
     <ClInclude Include="CubemapClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\Downloads\ObjectShaderClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Downloads\StaticObjectsClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Downloads\StreetCircuitClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\ps\Color.ps">
@@ -254,6 +272,12 @@
       <Filter>Shader Files\vs</Filter>
     </None>
     <None Include="Skybox.ps">
+      <Filter>Shader Files\ps</Filter>
+    </None>
+    <None Include="..\..\..\..\Downloads\Object.vs">
+      <Filter>Shader Files\vs</Filter>
+    </None>
+    <None Include="..\..\..\..\Downloads\Object.ps">
       <Filter>Shader Files\ps</Filter>
     </None>
   </ItemGroup>

@@ -8,9 +8,11 @@ ZoneClass::ZoneClass()
 	m_Position = NULL;
 	m_Frustum = NULL;
 	m_SkyDome = NULL;
-	m_Skybox = NULL;     
-	m_Cubemap = NULL;    
+	m_Skybox = NULL;
+	m_Cubemap = NULL;
 	m_Terrain = NULL;
+	m_StreetCircuit = NULL;
+	m_StaticObjects = NULL;
 	m_displayUI = false; // F1
 	m_wireFrame = false; // F2
 	m_play = false; // F3
@@ -30,9 +32,52 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 	m_Position = new PositionClass();
 	m_Frustum = new FrustumClass();
 	m_SkyDome = new SkyDomeClass();
-	m_Skybox = new SkyboxClass();   
-	m_Cubemap = new CubemapClass();  
+	m_Skybox = new SkyboxClass();
+	m_Cubemap = new CubemapClass();
 	m_Terrain = new TerrainClass();
+
+	// Initialize Street Circuit (oval track on terrain)
+	m_StreetCircuit = new StreetCircuitClass();
+	if (!m_StreetCircuit || !m_StreetCircuit->Initialize(direct3D->GetDevice(),
+		StreetCircuitClass::OVAL,  // Circuit type: CIRCULAR, OVAL, or RECTANGULAR
+		128.0f,   // Center X position
+		128.0f,   // Center Z position  
+		200.0f,   // Width
+		120.0f,   // Height (for oval/rectangular)
+		15.0f))   // Road width
+	{
+		return false;
+	}
+
+	// Initialize Static Objects
+	m_StaticObjects = new StaticObjectsClass();
+	if (!m_StaticObjects || !m_StaticObjects->Initialize(direct3D->GetDevice()))
+	{
+		return false;
+	}
+
+	// Add 10+ static objects around the circuit
+	// Buildings (around the track)
+	m_StaticObjects->AddObject(StaticObjectsClass::BUILDING, 50.0f, 0.5f, 50.0f, 15.0f, 25.0f, 15.0f, 0.0f);
+	m_StaticObjects->AddObject(StaticObjectsClass::BUILDING, 200.0f, 0.5f, 50.0f, 20.0f, 35.0f, 12.0f, 0.3f);
+	m_StaticObjects->AddObject(StaticObjectsClass::BUILDING, 50.0f, 0.5f, 200.0f, 18.0f, 30.0f, 18.0f, -0.2f);
+
+	// Trees (around the track)
+	m_StaticObjects->AddObject(StaticObjectsClass::TREE, 30.0f, 0.5f, 100.0f, 5.0f, 8.0f, 5.0f, 0.0f);
+	m_StaticObjects->AddObject(StaticObjectsClass::TREE, 230.0f, 0.5f, 150.0f, 6.0f, 10.0f, 6.0f, 0.5f);
+	m_StaticObjects->AddObject(StaticObjectsClass::TREE, 100.0f, 0.5f, 30.0f, 4.0f, 7.0f, 4.0f, 0.0f);
+
+	// Lampposts (along the track)
+	m_StaticObjects->AddObject(StaticObjectsClass::LAMPPOST, 60.0f, 0.5f, 128.0f, 2.0f, 15.0f, 2.0f, 0.0f);
+	m_StaticObjects->AddObject(StaticObjectsClass::LAMPPOST, 196.0f, 0.5f, 128.0f, 2.0f, 15.0f, 2.0f, 0.0f);
+
+	// Barriers (track boundaries)
+	m_StaticObjects->AddObject(StaticObjectsClass::BARRIER, 128.0f, 0.5f, 40.0f, 8.0f, 2.0f, 2.0f, 0.0f);
+	m_StaticObjects->AddObject(StaticObjectsClass::BARRIER, 128.0f, 0.5f, 216.0f, 8.0f, 2.0f, 2.0f, 0.0f);
+
+	// Traffic cones
+	m_StaticObjects->AddObject(StaticObjectsClass::CONE, 70.0f, 0.5f, 80.0f, 3.0f, 3.0f, 3.0f, 0.0f);
+	m_StaticObjects->AddObject(StaticObjectsClass::CONE, 186.0f, 0.5f, 176.0f, 3.0f, 3.0f, 3.0f, 0.0f);
 
 	if (!m_UserInterface ||
 		!m_Camera ||
@@ -40,8 +85,8 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 		!m_Position ||
 		!m_Frustum ||
 		!m_SkyDome ||
-		!m_Skybox ||     
-		!m_Cubemap ||     
+		!m_Skybox ||
+		!m_Cubemap ||
 		!m_Terrain ||
 		!m_UserInterface->Initialize(direct3D, screenHeight, screenWidth)
 		) {
@@ -63,12 +108,12 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 	if (!m_SkyDome->Initialize(direct3D->GetDevice()) ||
 		!m_Skybox->Initialize(direct3D->GetDevice()) ||
 		!m_Cubemap->Initialize(direct3D->GetDevice(), direct3D->GetDeviceContext(),
-			"data/skybox/right.tga",  
-			"data/skybox/left.tga",  
-			"data/skybox/top.tga",     
-			"data/skybox/bottom.tga",  
-			"data/skybox/front.tga",  
-			"data/skybox/back.tga") || 
+			"data/skybox/right.tga",
+			"data/skybox/left.tga",
+			"data/skybox/top.tga",
+			"data/skybox/bottom.tga",
+			"data/skybox/front.tga",
+			"data/skybox/back.tga") ||
 		!m_Terrain->Initialize(direct3D->GetDevice(), "data/Setup.txt")
 		) {
 		return false;
@@ -79,6 +124,19 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 
 void ZoneClass::Shutdown()
 {
+	if (m_StaticObjects)
+	{
+		m_StaticObjects->Shutdown();
+		delete m_StaticObjects;
+		m_StaticObjects = NULL;
+	}
+
+	if (m_StreetCircuit)
+	{
+		m_StreetCircuit->Shutdown();
+		delete m_StreetCircuit;
+		m_StreetCircuit = NULL;
+	}
 	if (m_Terrain) {
 		m_Terrain->Shutdown();
 		delete m_Terrain;
@@ -286,12 +344,12 @@ bool ZoneClass::Render(D3DClass* direct3D, ShaderManagerClass* shaderManager, Te
 				worldMatrix,
 				viewMatrix,
 				projectionMatrix,
-				textureManager->GetTexture(0),  
-				textureManager->GetTexture(1), 
-				textureManager->GetTexture(2),  
-				textureManager->GetTexture(3),  
-				textureManager->GetTexture(4),  
-				textureManager->GetTexture(5), 
+				textureManager->GetTexture(0),
+				textureManager->GetTexture(1),
+				textureManager->GetTexture(2),
+				textureManager->GetTexture(3),
+				textureManager->GetTexture(4),
+				textureManager->GetTexture(5),
 				m_Light->GetDirection(),
 				m_Light->GetDiffuseColor()
 			);
@@ -309,6 +367,51 @@ bool ZoneClass::Render(D3DClass* direct3D, ShaderManagerClass* shaderManager, Te
 				}
 			}
 		}
+	}
+
+	// Render Street Circuit
+	m_StreetCircuit->Render(direct3D->GetDeviceContext());
+	result = shaderManager->RenderObjectShader(
+		direct3D->GetDeviceContext(),
+		m_StreetCircuit->GetIndexCount(),
+		worldMatrix,
+		viewMatrix,
+		projectionMatrix,
+		textureManager->GetTexture(6),  // Circuit texture (asphalt)
+		m_Light->GetDirection(),
+		m_Light->GetDiffuseColor()
+	);
+	if (!result) return false;
+
+	// Render Static Objects
+	for (int i = 0; i < m_StaticObjects->GetObjectCount(); i++)
+	{
+		XMMATRIX objectWorld = m_StaticObjects->GetObjectWorldMatrix(i);
+
+		m_StaticObjects->Render(direct3D->GetDeviceContext(), i);
+
+		// Choose texture based on object type
+		int textureIndex = 7; // Default building texture
+		switch (m_StaticObjects->GetObjectType(i))
+		{
+		case StaticObjectsClass::BUILDING:  textureIndex = 7; break;
+		case StaticObjectsClass::TREE:      textureIndex = 8; break;
+		case StaticObjectsClass::LAMPPOST:  textureIndex = 9; break;
+		case StaticObjectsClass::BARRIER:   textureIndex = 7; break;
+		case StaticObjectsClass::CONE:      textureIndex = 7; break;
+		}
+
+		result = shaderManager->RenderObjectShader(
+			direct3D->GetDeviceContext(),
+			m_StaticObjects->GetIndexCount(i),
+			objectWorld,
+			viewMatrix,
+			projectionMatrix,
+			textureManager->GetTexture(textureIndex),
+			m_Light->GetDirection(),
+			m_Light->GetDiffuseColor()
+		);
+		if (!result) return false;
 	}
 
 	if (m_wireFrame) {

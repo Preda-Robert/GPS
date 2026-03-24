@@ -35,13 +35,17 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 		!m_Input->initialze(hinstance, hwnd, screenWidth, screenHeight) ||
 		!m_Direct3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR) ||
 		!m_ShaderManager->Initialize(m_Direct3D->GetDevice(), hwnd) ||
-		!m_TextureManager->Initialize(10) ||
+		!m_TextureManager->Initialize(15) ||
 		!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/rock01d.tga", 0) ||
 		!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/rock01n.tga", 1) ||
 		!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/snow01n.tga", 2) ||
 		!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/distance01n.tga", 3) ||
-!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/grass.tga", 4) || 
-!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/grass.tga", 5) ||
+    !m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/grass.tga", 4) || 
+		!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/grass.tga", 5) ||
+		!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/asphalt.tga", 6) ||
+		!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/building.tga", 7) ||
+		!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/tree.tga", 8) ||
+		!m_TextureManager->LoadTexture(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), "data/textures/metal.tga", 9) ||
 		!m_Timer->Initialize() ||
 		!m_Zone->Initialize(m_Direct3D, hwnd, screenWidth, screenHeight, SCREEN_DEPTH)
 		) {

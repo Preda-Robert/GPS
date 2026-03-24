@@ -9,6 +9,7 @@ ShaderManagerClass::ShaderManagerClass()
 	m_SkyDomeShader = NULL;
 	m_TerrainShader = NULL;
 	m_SkyboxShader = NULL;  
+	m_ObjectShader = NULL;
 }
 
 ShaderManagerClass::~ShaderManagerClass()
@@ -24,6 +25,9 @@ bool ShaderManagerClass::Initialize(ID3D11Device* device, HWND hwnd)
 	m_SkyDomeShader = new SkyDomeShaderClass();
 	m_TerrainShader = new TerrainShaderClass();
 	m_SkyboxShader = new SkyboxShaderClass(); 
+	m_ObjectShader = new ObjectShaderClass();
+	if (!m_ObjectShader || !m_ObjectShader->Initialize(device, hwnd))
+		return false;
 
 	if (!m_ColorShader ||
 		!m_TextureShader ||
@@ -48,6 +52,12 @@ bool ShaderManagerClass::Initialize(ID3D11Device* device, HWND hwnd)
 
 void ShaderManagerClass::Shutdown()
 {
+	if (m_ObjectShader) {
+		m_ObjectShader->Shutdown();
+		delete m_ObjectShader;
+		m_ObjectShader = NULL;
+	}
+
 	if (m_SkyboxShader) {
 		m_SkyboxShader->Shutdown();
 		delete m_SkyboxShader;
@@ -185,6 +195,14 @@ bool ShaderManagerClass::RenderSkyDomeShader(
 		apexColor,
 		centerColor
 	);
+}
+
+bool ShaderManagerClass::RenderObjectShader(ID3D11DeviceContext* deviceContext, int indexCount,
+	XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projectionMatrix,
+	ID3D11ShaderResourceView* texture, XMFLOAT3 lightDirection, XMFLOAT4 diffuseColor)
+{
+	return m_ObjectShader->Render(deviceContext, indexCount, worldMatrix, viewMatrix,
+		projectionMatrix, texture, lightDirection, diffuseColor);
 }
 
 bool ShaderManagerClass::RenderTerrainShader(

@@ -15,6 +15,8 @@
 #include "SkyboxClass.h"      
 #include "CubemapClass.h"    
 #include "TerrainClass.h"
+#include "StreetCircuitClass.h"
+#include "StaticObjectsClass.h"
 
 class ZoneClass
 {
@@ -38,13 +40,15 @@ private:
 	FrustumClass* m_Frustum;
 	SkyDomeClass* m_SkyDome;
 	SkyboxClass* m_Skybox;
-	CubemapClass* m_Cubemap;     
+	CubemapClass* m_Cubemap;
 	TerrainClass* m_Terrain;
 	bool m_displayUI;
 	bool m_wireFrame;
 	bool m_play;
 	bool m_cellLines;
 	bool m_heightLocked;
+	StreetCircuitClass* m_StreetCircuit;
+	StaticObjectsClass* m_StaticObjects;
 };
 
 #endif
