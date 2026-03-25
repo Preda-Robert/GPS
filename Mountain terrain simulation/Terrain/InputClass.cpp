@@ -172,7 +172,7 @@ bool InputClass::IsDPressed()
 
 bool InputClass::IsPgUpPressed()
 {
-	if (m_keyboardState[DIK_PGUP] & 0x80) {
+	if (m_keyboardState[DIK_N] & 0x80) {
 		return true;
 	}
 
@@ -181,7 +181,7 @@ bool InputClass::IsPgUpPressed()
 
 bool InputClass::IsPgDownPressed()
 {
-	if (m_keyboardState[DIK_PGDN] & 0x80) {
+	if (m_keyboardState[DIK_M] & 0x80) {
 		return true;
 	}
 

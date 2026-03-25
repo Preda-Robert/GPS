@@ -120,13 +120,13 @@
     <ClCompile Include="CubemapClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Downloads\StaticObjectsClass.cpp">
+    <ClCompile Include="StaticObjectsClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Downloads\StreetCircuitClass.cpp">
+    <ClCompile Include="StreetCircuitClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Downloads\ObjectShaderClass.cpp">
+    <ClCompile Include="ObjectShaderClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -224,13 +224,13 @@
     <ClInclude Include="CubemapClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Downloads\ObjectShaderClass.h">
+    <ClInclude Include="ObjectShaderClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Downloads\StaticObjectsClass.h">
+    <ClInclude Include="StaticObjectsClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Downloads\StreetCircuitClass.h">
+    <ClInclude Include="StreetCircuitClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -274,10 +274,10 @@
     <None Include="Skybox.ps">
       <Filter>Shader Files\ps</Filter>
     </None>
-    <None Include="..\..\..\..\Downloads\Object.vs">
+    <None Include="shaders\vs\Object.vs">
       <Filter>Shader Files\vs</Filter>
     </None>
-    <None Include="..\..\..\..\Downloads\Object.ps">
+    <None Include="shaders\ps\Object.ps">
       <Filter>Shader Files\ps</Filter>
     </None>
   </ItemGroup>

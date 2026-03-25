@@ -147,9 +147,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\Downloads\ObjectShaderClass.cpp" />
-    <ClCompile Include="..\..\..\..\Downloads\StaticObjectsClass.cpp" />
-    <ClCompile Include="..\..\..\..\Downloads\StreetCircuitClass.cpp" />
+    <ClCompile Include="ObjectShaderClass.cpp" />
+    <ClCompile Include="StaticObjectsClass.cpp" />
+    <ClCompile Include="StreetCircuitClass.cpp" />
     <ClCompile Include="ApplicationClass.cpp" />
     <ClCompile Include="BitmapClass.cpp" />
     <ClCompile Include="CameraClass.cpp" />
@@ -184,9 +184,9 @@
     <ClCompile Include="ZoneClass.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\Downloads\ObjectShaderClass.h" />
-    <ClInclude Include="..\..\..\..\Downloads\StaticObjectsClass.h" />
-    <ClInclude Include="..\..\..\..\Downloads\StreetCircuitClass.h" />
+    <ClInclude Include="ObjectShaderClass.h" />
+    <ClInclude Include="StaticObjectsClass.h" />
+    <ClInclude Include="StreetCircuitClass.h" />
     <ClInclude Include="ApplicationClass.h" />
     <ClInclude Include="BitmapClass.h" />
     <ClInclude Include="CameraClass.h" />
@@ -220,17 +220,17 @@
     <ClInclude Include="ZoneClass.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\Downloads\Object.ps" />
-    <None Include="..\..\..\..\Downloads\Object.vs" />
     <None Include="shaders\ps\Color.ps" />
     <None Include="shaders\ps\Font.ps" />
     <None Include="shaders\ps\Light.ps" />
+    <None Include="shaders\ps\Object.ps" />
     <None Include="shaders\ps\SkyDome.ps" />
     <None Include="shaders\ps\Terrain.ps" />
     <None Include="shaders\ps\Texture.ps" />
     <None Include="shaders\vs\Color.vs" />
     <None Include="shaders\vs\Font.vs" />
     <None Include="shaders\vs\Light.vs" />
+    <None Include="shaders\vs\Object.vs" />
     <None Include="shaders\vs\SkyDome.vs" />
     <None Include="shaders\vs\Terrain.vs" />
     <None Include="shaders\vs\Texture.vs" />

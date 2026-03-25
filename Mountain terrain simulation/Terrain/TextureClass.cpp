@@ -108,51 +108,40 @@ bool TextureClass::LoadTarga(char* filename, int& height, int& width)
 	width = (int)targaFileHeader.width;
 	bpp = (int)targaFileHeader.bpp;
 
-	if (bpp != 32) {
+	if (bpp != 32 && bpp != 24) {
 		return false;
 	}
 
-	imageSize = width * height * 4;
+	int bytesPerPixel = bpp / 8;
+	int rawImageSize = width * height * bytesPerPixel;
+	imageSize = width * height * 4; 
 
-	targaImage = new unsigned char[imageSize];
+	targaImage = new unsigned char[rawImageSize];
+	if (!targaImage) { return false; }
 
-	if (!targaImage) {
-		return false;
-	}
-
-	count = (unsigned int)fread(targaImage, 1, imageSize, filePtr);
-
-	if (count != imageSize) {
-		return false;
-	}
+	count = (unsigned int)fread(targaImage, 1, rawImageSize, filePtr);
+	if (count != (unsigned int)rawImageSize) { return false; }
 
 	error = fclose(filePtr);
-
-	if (error != 0) {
-		return false;
-	}
+	if (error != 0) { return false; }
 
 	m_targaData = new unsigned char[imageSize];
-
-	if (!m_targaData) {
-		return false;
-	}
+	if (!m_targaData) { return false; }
 
 	index = 0;
-	k = (width * height * 4) - (width * 4);
+	k = (width * height * bytesPerPixel) - (width * bytesPerPixel);
 
 	for (i = 0; i < height; ++i) {
 		for (j = 0; j < width; ++j) {
-			m_targaData[index + 0] = targaImage[k + 2]; // Red.
-			m_targaData[index + 1] = targaImage[k + 1]; // Green.
-			m_targaData[index + 2] = targaImage[k + 0]; // Blue.
-			m_targaData[index + 3] = targaImage[k + 3]; // Alpha.
+			m_targaData[index + 0] = targaImage[k + 2]; // Red
+			m_targaData[index + 1] = targaImage[k + 1]; // Green
+			m_targaData[index + 2] = targaImage[k + 0]; // Blue
+			m_targaData[index + 3] = (bpp == 32) ? targaImage[k + 3] : 255; // Alpha
 
-			k += 4;
+			k += bytesPerPixel;
 			index += 4;
 		}
-
-		k -= (width * 8);
+		k -= (width * bytesPerPixel * 2);
 	}
 
 	delete[] targaImage;

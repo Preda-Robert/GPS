@@ -49,7 +49,6 @@ void StaticObjectsClass::AddObject(ObjectType type, float x, float y, float z, f
 
 bool StaticObjectsClass::CreateBuildingBuffers(ID3D11Device* device, ObjectBuffers& buffers)
 {
-    // Simple box building
     VertexType vertices[] = {
         // Front face
         {{-0.5f, 0.0f, -0.5f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
@@ -117,12 +116,10 @@ bool StaticObjectsClass::CreateBuildingBuffers(ID3D11Device* device, ObjectBuffe
 
 bool StaticObjectsClass::CreateTreeBuffers(ID3D11Device* device, ObjectBuffers& buffers)
 {
-    // Cone-shaped tree with trunk
     const int segments = 12;
     std::vector<VertexType> vertices;
     std::vector<unsigned long> indices;
 
-    // Trunk (cylinder)
     float trunkRadius = 0.1f;
     float trunkHeight = 0.4f;
     
@@ -132,13 +129,10 @@ bool StaticObjectsClass::CreateTreeBuffers(ID3D11Device* device, ObjectBuffers& 
         float x = trunkRadius * cosf(angle);
         float z = trunkRadius * sinf(angle);
         
-        // Bottom vertex
         vertices.push_back({{x, 0.0f, z}, {(float)i / segments, 1.0f}, {cosf(angle), 0.0f, sinf(angle)}});
-        // Top vertex
         vertices.push_back({{x, trunkHeight, z}, {(float)i / segments, 0.0f}, {cosf(angle), 0.0f, sinf(angle)}});
     }
 
-    // Trunk indices
     for (int i = 0; i < segments; i++)
     {
         int base = i * 2;
@@ -150,16 +144,13 @@ bool StaticObjectsClass::CreateTreeBuffers(ID3D11Device* device, ObjectBuffers& 
         indices.push_back(base + 3);
     }
 
-    // Foliage (cone)
     int coneBase = (int)vertices.size();
     float coneRadius = 0.5f;
     float coneHeight = 1.0f;
     float coneYBase = trunkHeight;
 
-    // Cone apex
     vertices.push_back({{0.0f, coneYBase + coneHeight, 0.0f}, {0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}});
 
-    // Cone base vertices
     for (int i = 0; i <= segments; i++)
     {
         float angle = (float)i / segments * 2.0f * PI;
@@ -174,10 +165,9 @@ bool StaticObjectsClass::CreateTreeBuffers(ID3D11Device* device, ObjectBuffers& 
         vertices.push_back({{x, coneYBase, z}, {(float)i / segments, 1.0f}, normal});
     }
 
-    // Cone indices
     for (int i = 0; i < segments; i++)
     {
-        indices.push_back(coneBase);  // apex
+        indices.push_back(coneBase);  
         indices.push_back(coneBase + 1 + i);
         indices.push_back(coneBase + 1 + i + 1);
     }
@@ -212,9 +202,8 @@ bool StaticObjectsClass::CreateTreeBuffers(ID3D11Device* device, ObjectBuffers& 
 
 bool StaticObjectsClass::CreateLamppostBuffers(ID3D11Device* device, ObjectBuffers& buffers)
 {
-    // Simple lamppost: thin pole + box light
     VertexType vertices[] = {
-        // Pole (thin box)
+        // Pole
         {{-0.05f, 0.0f, -0.05f}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}},
         {{-0.05f, 1.0f, -0.05f}, {0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}},
         {{ 0.05f, 1.0f, -0.05f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
@@ -280,7 +269,6 @@ bool StaticObjectsClass::CreateLamppostBuffers(ID3D11Device* device, ObjectBuffe
 
 bool StaticObjectsClass::CreateBarrierBuffers(ID3D11Device* device, ObjectBuffers& buffers)
 {
-    // Road barrier - simple elongated box
     VertexType vertices[] = {
         // Front
         {{-1.0f, 0.0f, -0.1f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
@@ -335,7 +323,6 @@ bool StaticObjectsClass::CreateBarrierBuffers(ID3D11Device* device, ObjectBuffer
 
 bool StaticObjectsClass::CreateConeBuffers(ID3D11Device* device, ObjectBuffers& buffers)
 {
-    // Traffic cone
     const int segments = 8;
     std::vector<VertexType> vertices;
     std::vector<unsigned long> indices;
@@ -344,27 +331,22 @@ bool StaticObjectsClass::CreateConeBuffers(ID3D11Device* device, ObjectBuffers& 
     float topRadius = 0.03f;
     float height = 0.3f;
 
-    // Base circle center
     vertices.push_back({{0.0f, 0.0f, 0.0f}, {0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}});
 
-    // Cone surface
     for (int i = 0; i <= segments; i++)
     {
         float angle = (float)i / segments * 2.0f * PI;
         float cosA = cosf(angle);
         float sinA = sinf(angle);
 
-        // Bottom vertex
         vertices.push_back({{baseRadius * cosA, 0.0f, baseRadius * sinA}, 
                            {(float)i / segments, 1.0f}, 
                            {cosA, 0.3f, sinA}});
-        // Top vertex
         vertices.push_back({{topRadius * cosA, height, topRadius * sinA}, 
                            {(float)i / segments, 0.0f}, 
                            {cosA, 0.3f, sinA}});
     }
 
-    // Base indices
     for (int i = 0; i < segments; i++)
     {
         indices.push_back(0);
@@ -372,7 +354,6 @@ bool StaticObjectsClass::CreateConeBuffers(ID3D11Device* device, ObjectBuffers& 
         indices.push_back(1 + (i + 1) * 2);
     }
 
-    // Side indices
     for (int i = 0; i < segments; i++)
     {
         int base = 1 + i * 2;
