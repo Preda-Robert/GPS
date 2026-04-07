@@ -25,7 +25,7 @@ ControllableObjectClass::ControllableObjectClass()
     m_height = 1.0f;
     m_depth = 1.0f;
 
-    m_objectType = PEDESTRIAN;
+    m_objectType = CAR;
 }
 
 ControllableObjectClass::~ControllableObjectClass()

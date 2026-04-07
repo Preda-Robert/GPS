@@ -106,8 +106,6 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 
 	m_MovingObjects->AddPatrolMover(128.0f, 17.0f, offset + 60.0f, 1.5f, MovingObjectsClass::SPHERE, XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f), 30.0f, 10.0f);
 
-	m_MovingObjects->AddSineWaveMover(60.0f, 18.0f, offset + 128.0f, 1.8f, MovingObjectsClass::CUBE, XMFLOAT4(0.5f, 0.0f, 1.0f, 1.0f), 8.0f, 2.0f, 15.0f);
-
 	if (!m_UserInterface ||
 		!m_Camera ||
 		!m_Light ||

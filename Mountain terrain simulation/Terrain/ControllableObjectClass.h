@@ -12,7 +12,7 @@ class StaticObjectsClass;
 class ControllableObjectClass
 {
 public:
-    enum ObjectType { PEDESTRIAN, CAR };
+    enum ObjectType { CAR };
 
     struct BoundingBox
     {
@@ -58,7 +58,6 @@ public:
     ObjectType GetObjectType();
 
 private:
-    bool CreatePedestrianBuffers(ID3D11Device* device);
     bool CreateCarBuffers(ID3D11Device* device);
     void ShutdownBuffers();
 
