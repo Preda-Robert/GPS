@@ -17,6 +17,8 @@
 #include "TerrainClass.h"
 #include "StreetCircuitClass.h"
 #include "StaticObjectsClass.h"
+#include "ShadowMapClass.h"
+#include "StreetLightClass.h"
 
 class ZoneClass
 {
@@ -30,6 +32,7 @@ public:
 private:
 	void HandleMovementInput(InputClass*, float);
 	void PushedF3Button(float);
+	bool RenderShadowMap(D3DClass*, ShaderManagerClass*);
 	bool Render(D3DClass*, ShaderManagerClass*, TextureManagerClass*);
 
 private:
@@ -42,6 +45,9 @@ private:
 	SkyboxClass* m_Skybox;
 	CubemapClass* m_Cubemap;
 	TerrainClass* m_Terrain;
+	ShadowMapClass* m_ShadowMap;
+	StreetLightClass* m_StreetLights;
+	ShadowMapClass* m_StreetLightShadowMaps[8]; 
 	bool m_displayUI;
 	bool m_wireFrame;
 	bool m_play;

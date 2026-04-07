@@ -22,7 +22,6 @@ float4 ObjectPixelShader(PixelInputType input) : SV_TARGET
     float3 lightDir = -normalize(lightDirection);
     float lightIntensity = saturate(dot(input.normal, lightDir));
     
-    // Add ambient light
     float4 ambient = float4(0.2f, 0.2f, 0.2f, 1.0f);
     float4 color = ambient + (diffuseColor * lightIntensity);
     color = saturate(color);

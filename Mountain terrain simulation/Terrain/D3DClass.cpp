@@ -1,4 +1,4 @@
-#include "D3DClass.h"
+	#include "D3DClass.h"
 
 D3DClass::D3DClass()
 {
@@ -44,7 +44,6 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 	D3D11_RASTERIZER_DESC rasterDesc;
-	D3D11_VIEWPORT viewport;
 	D3D11_DEPTH_STENCIL_DESC depthDisabledStencilDesc;
 	D3D11_BLEND_DESC blendStateDescription;
 	unsigned int numModes, i, numerator{}, denominator{};
@@ -321,15 +320,15 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 	m_deviceContext->RSSetState(m_rasterState);
 
 	// Setup the viewport for rendering.
-	viewport.Width = (float)screenWidth;
-	viewport.Height = (float)screenHeight;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-	viewport.TopLeftX = 0.0f;
-	viewport.TopLeftY = 0.0f;
+	m_viewport.Width = (float)screenWidth;
+	m_viewport.Height = (float)screenHeight;
+	m_viewport.MinDepth = 0.0f;
+	m_viewport.MaxDepth = 1.0f;
+	m_viewport.TopLeftX = 0.0f;
+	m_viewport.TopLeftY = 0.0f;
 
 	// Create the viewport.
-	m_deviceContext->RSSetViewports(1, &viewport);
+	m_deviceContext->RSSetViewports(1, &m_viewport);
 
 	// Setup the projection matrix.
 	fieldOfView = 3.141592654f / 4.0f;
@@ -637,6 +636,20 @@ void D3DClass::EnableWireframe()
 void D3DClass::DisableWireframe()
 {
 	m_deviceContext->RSSetState(m_rasterState);
+
+	return;
+}
+
+void D3DClass::SetBackBufferRenderTarget()
+{
+	m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
+
+	return;
+}
+
+void D3DClass::ResetViewport()
+{
+	m_deviceContext->RSSetViewports(1, &m_viewport);
 
 	return;
 }

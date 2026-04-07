@@ -3,15 +3,28 @@ Texture2D normalTexture1 : register(t1);
 Texture2D normalTexture2 : register(t2);   
 Texture2D normalTexture3 : register(t3);   
 Texture2D grassTexture : register(t4);    
-Texture2D grassNormal : register(t5);      
+Texture2D grassNormal : register(t5);
+Texture2D shadowMapTexture : register(t6);
 
 SamplerState SampleType : register(s0);
+SamplerComparisonState ShadowSampler : register(s1);
 
-cbuffer LightBuffer
+#define MAX_POINT_LIGHTS 8
+
+cbuffer LightBuffer : register(b0)
 {
 	float4 diffuseColor;
 	float3 lightDirection;
-	float padding;
+	float shadowMapBias;
+};
+
+cbuffer PointLightBuffer : register(b1)
+{
+	float4 pointLightPositions[MAX_POINT_LIGHTS];  // xyz = position, w = range
+	float4 pointLightColors[MAX_POINT_LIGHTS];     // rgb = color, a = intensity
+	float4 pointLightAttenuation[MAX_POINT_LIGHTS]; // x = constant, y = linear, z = quadratic, w = enabled
+	int numPointLights;
+	float3 pointLightPadding;
 };
 
 struct PixelInputType
@@ -24,8 +37,89 @@ struct PixelInputType
 	float4 color : COLOR;
 	float2 tex2 : TEXCOORD1;
 	float4 depthPosition : TEXCOORD2;
-	float3 worldPosition : TEXCOORD3; 
+	float3 worldPosition : TEXCOORD3;
+	float4 lightViewPosition : TEXCOORD4;
 };
+
+float CalculateShadow(float4 lightViewPosition)
+{
+	float2 projectTexCoord;
+	float lightDepthValue;
+	
+	// Transform from clip space to texture coordinates
+	projectTexCoord.x = lightViewPosition.x / lightViewPosition.w * 0.5f + 0.5f;
+	projectTexCoord.y = -lightViewPosition.y / lightViewPosition.w * 0.5f + 0.5f;
+	
+	// Check if the projected coordinate is within the shadow map bounds
+	if ((saturate(projectTexCoord.x) == projectTexCoord.x) && 
+	    (saturate(projectTexCoord.y) == projectTexCoord.y))
+	{
+		// Get the depth from the light's perspective
+		lightDepthValue = lightViewPosition.z / lightViewPosition.w;
+		lightDepthValue = lightDepthValue - shadowMapBias;
+		
+		// Sample shadow map with PCF (percentage-closer filtering)
+		float shadow = 0.0f;
+		float2 texelSize = float2(1.0f / 2048.0f, 1.0f / 2048.0f);
+		
+		[unroll]
+		for (int x = -1; x <= 1; x++)
+		{
+			[unroll]
+			for (int y = -1; y <= 1; y++)
+			{
+				float2 offset = float2(x, y) * texelSize;
+				float depthSample = shadowMapTexture.Sample(SampleType, projectTexCoord + offset).r;
+				// If pixel depth > shadow map depth, we're in shadow
+				shadow += (lightDepthValue > depthSample) ? 0.3f : 1.0f;
+			}
+		}
+		shadow /= 9.0f;
+		
+		return shadow;
+	}
+	
+	return 1.0f;  // Outside shadow map bounds - fully lit
+}
+
+// Calculate point light contribution using linear falloff (teacher's approach)
+float3 CalculatePointLight(int lightIndex, float3 worldPos, float3 normal)
+{
+	float4 posData = pointLightPositions[lightIndex];
+	float4 colorData = pointLightColors[lightIndex];
+	float4 attenData = pointLightAttenuation[lightIndex];
+	
+	// Check if light is enabled (w component of attenuation)
+	if (attenData.w < 0.5f)
+		return float3(0.0f, 0.0f, 0.0f);
+		
+	float3 lightPos = posData.xyz;
+	float falloffEnd = posData.w;           // Range stored in w
+	float falloffStart = falloffEnd * 0.1f;  // Start falloff at 10% of range
+	float3 lightColor = colorData.rgb;
+	float intensity = colorData.a;
+	
+	// Vector from surface to light
+	float3 lightVec = lightPos - worldPos;
+	float distance = length(lightVec);
+	
+	// Range test
+	if (distance > falloffEnd)
+		return float3(0.0f, 0.0f, 0.0f);
+	
+	// Normalize
+	lightVec = lightVec / distance;
+	
+	// Lambert's cosine law
+	float NdotL = max(dot(normal, lightVec), 0.0f);
+	float3 lightStrength = lightColor * intensity * NdotL;
+	
+	// Linear attenuation (teacher's approach)
+	float attenuation = saturate((falloffEnd - distance) / (falloffEnd - falloffStart));
+	lightStrength *= attenuation;
+	
+	return lightStrength;
+}
 
 float4 TerrainPixelShader(PixelInputType input) : SV_TARGET
 {
@@ -103,7 +197,19 @@ float4 TerrainPixelShader(PixelInputType input) : SV_TARGET
 	}
 	else {
 		color = material1;
-		}
+	}
+	
+	// Apply shadow from directional light
+	float shadowFactor = CalculateShadow(input.lightViewPosition);
+	color.rgb *= shadowFactor;
+	
+	// Add point light contributions
+	float3 pointLightContribution = float3(0.0f, 0.0f, 0.0f);
+	for (int i = 0; i < numPointLights && i < MAX_POINT_LIGHTS; i++)
+	{
+		pointLightContribution += CalculatePointLight(i, input.worldPosition, bumpNormal);
+	}
+	color.rgb += pointLightContribution * color.rgb;
 		
 	return color;
 }

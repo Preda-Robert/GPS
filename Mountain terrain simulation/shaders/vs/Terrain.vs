@@ -3,6 +3,8 @@ cbuffer MatrixBuffer
 	matrix worldMatrix;
 	matrix viewMatrix;
 	matrix projectionMatrix;
+	matrix lightViewMatrix;
+	matrix lightProjectionMatrix;
 };
 
 struct VertexInputType
@@ -26,7 +28,8 @@ struct PixelInputType
 	float4 color : COLOR;
 	float2 tex2 : TEXCOORD1;
 	float4 depthPosition : TEXCOORD2;
-	float3 worldPosition : TEXCOORD3;  
+	float3 worldPosition : TEXCOORD3;
+	float4 lightViewPosition : TEXCOORD4;
 };
 
 PixelInputType TerrainVertexShader(VertexInputType input)
@@ -37,10 +40,14 @@ PixelInputType TerrainVertexShader(VertexInputType input)
 	input.position.w = 1.0f;
 
 	worldPos = mul(input.position, worldMatrix);
-	output.worldPosition = worldPos.xyz;  
+	output.worldPosition = worldPos.xyz;
 
 	output.position = mul(worldPos, viewMatrix);
 	output.position = mul(output.position, projectionMatrix);
+
+	// Calculate position from light's perspective for shadow mapping
+	output.lightViewPosition = mul(worldPos, lightViewMatrix);
+	output.lightViewPosition = mul(output.lightViewPosition, lightProjectionMatrix);
 
 	output.tex = input.tex;
 	output.tex2 = input.tex2;

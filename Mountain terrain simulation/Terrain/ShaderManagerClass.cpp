@@ -10,6 +10,7 @@ ShaderManagerClass::ShaderManagerClass()
 	m_TerrainShader = NULL;
 	m_SkyboxShader = NULL;  
 	m_ObjectShader = NULL;
+	m_DepthShader = NULL;
 }
 
 ShaderManagerClass::~ShaderManagerClass()
@@ -27,6 +28,10 @@ bool ShaderManagerClass::Initialize(ID3D11Device* device, HWND hwnd)
 	m_SkyboxShader = new SkyboxShaderClass(); 
 	m_ObjectShader = new ObjectShaderClass();
 	if (!m_ObjectShader || !m_ObjectShader->Initialize(device, hwnd))
+		return false;
+
+	m_DepthShader = new DepthShaderClass();
+	if (!m_DepthShader || !m_DepthShader->Initialize(device, hwnd))
 		return false;
 
 	if (!m_ColorShader ||
@@ -52,6 +57,12 @@ bool ShaderManagerClass::Initialize(ID3D11Device* device, HWND hwnd)
 
 void ShaderManagerClass::Shutdown()
 {
+	if (m_DepthShader) {
+		m_DepthShader->Shutdown();
+		delete m_DepthShader;
+		m_DepthShader = NULL;
+	}
+
 	if (m_ObjectShader) {
 		m_ObjectShader->Shutdown();
 		delete m_ObjectShader;
@@ -211,18 +222,34 @@ bool ShaderManagerClass::RenderTerrainShader(
 	XMMATRIX worldMatrix,
 	XMMATRIX viewMatrix,
 	XMMATRIX projectionMatrix,
+	XMMATRIX lightViewMatrix,
+	XMMATRIX lightProjectionMatrix,
 	ID3D11ShaderResourceView* texture,
 	ID3D11ShaderResourceView* normalMap,
 	ID3D11ShaderResourceView* normalMap2,
 	ID3D11ShaderResourceView* normalMap3,
-	ID3D11ShaderResourceView* grassTexture,     // NEW
-	ID3D11ShaderResourceView* grassNormalMap,   // NEW
+	ID3D11ShaderResourceView* grassTexture,
+	ID3D11ShaderResourceView* grassNormalMap,
+	ID3D11ShaderResourceView* shadowMapTexture,
 	XMFLOAT3 lightDirection,
-	XMFLOAT4 diffuseColor)
+	XMFLOAT4 diffuseColor,
+	TerrainShaderClass::PointLightBufferType* pointLights)
 {
 	return m_TerrainShader->Render(deviceContext, indexCount, worldMatrix, viewMatrix, projectionMatrix,
+		lightViewMatrix, lightProjectionMatrix,
 		texture, normalMap, normalMap2, normalMap3, grassTexture, grassNormalMap,
-		lightDirection, diffuseColor);
+		shadowMapTexture,
+		lightDirection, diffuseColor, pointLights);
+}
+
+bool ShaderManagerClass::RenderDepthShader(
+	ID3D11DeviceContext* deviceContext,
+	int indexCount,
+	XMMATRIX worldMatrix,
+	XMMATRIX viewMatrix,
+	XMMATRIX projectionMatrix)
+{
+	return m_DepthShader->Render(deviceContext, indexCount, worldMatrix, viewMatrix, projectionMatrix);
 }
 
 // NEW: RenderSkyboxShader

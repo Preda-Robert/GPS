@@ -89,6 +89,11 @@ bool TerrainClass::RenderCell(ID3D11DeviceContext* deviceContext, int cellId, Fr
 	return true;
 }
 
+void TerrainClass::RenderCellForShadow(ID3D11DeviceContext* deviceContext, int cellId)
+{
+	m_TerrainCells[cellId].Render(deviceContext);
+}
+
 void TerrainClass::RenderCellLines(ID3D11DeviceContext* deviceContext, int cellId)
 {
 	m_TerrainCells[cellId].RenderLineBuffers(deviceContext);

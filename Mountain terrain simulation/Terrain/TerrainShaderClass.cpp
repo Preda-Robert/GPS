@@ -7,7 +7,9 @@ TerrainShaderClass::TerrainShaderClass()
 	m_layout = NULL;
 	m_matrixBuffer = NULL;
 	m_sampleState = NULL;
+	m_shadowSampleState = NULL;
 	m_lightBuffer = NULL;
+	m_pointLightBuffer = NULL;
 }
 
 TerrainShaderClass::~TerrainShaderClass()
@@ -36,18 +38,24 @@ bool TerrainShaderClass::Render(
 	XMMATRIX worldMatrix,
 	XMMATRIX viewMatrix,
 	XMMATRIX projectionMatrix,
+	XMMATRIX lightViewMatrix,
+	XMMATRIX lightProjectionMatrix,
 	ID3D11ShaderResourceView* texture,
 	ID3D11ShaderResourceView* normalMap,
 	ID3D11ShaderResourceView* normalMap2,
 	ID3D11ShaderResourceView* normalMap3,
 	ID3D11ShaderResourceView* grassTexture,
 	ID3D11ShaderResourceView* grassNormalMap,
+	ID3D11ShaderResourceView* shadowMapTexture,
 	XMFLOAT3 lightDirection,
-	XMFLOAT4 diffuseColor)
+	XMFLOAT4 diffuseColor,
+	PointLightBufferType* pointLights)
 {
 	if (!SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix,
+		lightViewMatrix, lightProjectionMatrix,
 		texture, normalMap, normalMap2, normalMap3, grassTexture, grassNormalMap,
-		lightDirection, diffuseColor)) {
+		shadowMapTexture,
+		lightDirection, diffuseColor, pointLights)) {
 		return false;
 	}
 
@@ -196,6 +204,25 @@ bool TerrainShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 		return false;
 	}
 
+	D3D11_SAMPLER_DESC shadowSamplerDesc;
+	shadowSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSamplerDesc.MipLODBias = 0.0f;
+	shadowSamplerDesc.MaxAnisotropy = 1;
+	shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	shadowSamplerDesc.BorderColor[0] = 1.0f;
+	shadowSamplerDesc.BorderColor[1] = 1.0f;
+	shadowSamplerDesc.BorderColor[2] = 1.0f;
+	shadowSamplerDesc.BorderColor[3] = 1.0f;
+	shadowSamplerDesc.MinLOD = 0;
+	shadowSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	if (FAILED(device->CreateSamplerState(&shadowSamplerDesc, &m_shadowSampleState))) {
+		return false;
+	}
+
 	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
 	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -207,14 +234,36 @@ bool TerrainShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 		return false;
 	}
 
+	D3D11_BUFFER_DESC pointLightBufferDesc;
+	pointLightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	pointLightBufferDesc.ByteWidth = sizeof(PointLightBufferType);
+	pointLightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	pointLightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	pointLightBufferDesc.MiscFlags = 0;
+	pointLightBufferDesc.StructureByteStride = 0;
+
+	if (FAILED(device->CreateBuffer(&pointLightBufferDesc, NULL, &m_pointLightBuffer))) {
+		return false;
+	}
+
 	return true;
 }
 
 void TerrainShaderClass::ShutdownShader()
 {
+	if (m_pointLightBuffer) {
+		m_pointLightBuffer->Release();
+		m_pointLightBuffer = NULL;
+	}
+
 	if (m_lightBuffer) {
 		m_lightBuffer->Release();
 		m_lightBuffer = NULL;
+	}
+
+	if (m_shadowSampleState) {
+		m_shadowSampleState->Release();
+		m_shadowSampleState = NULL;
 	}
 
 	if (m_sampleState) {
@@ -275,23 +324,30 @@ bool TerrainShaderClass::SetShaderParameters(
 	XMMATRIX worldMatrix,
 	XMMATRIX viewMatrix,
 	XMMATRIX projectionMatrix,
+	XMMATRIX lightViewMatrix,
+	XMMATRIX lightProjectionMatrix,
 	ID3D11ShaderResourceView* texture,
 	ID3D11ShaderResourceView* normalMap,
 	ID3D11ShaderResourceView* normalMap2,
 	ID3D11ShaderResourceView* normalMap3,
 	ID3D11ShaderResourceView* grassTexture,
 	ID3D11ShaderResourceView* grassNormalMap,
+	ID3D11ShaderResourceView* shadowMapTexture,
 	XMFLOAT3 lightDirection,
-	XMFLOAT4 diffuseColor)
+	XMFLOAT4 diffuseColor,
+	PointLightBufferType* pointLights)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
 	unsigned int bufferNumber;
 	LightBufferType* dataPtr2;
+	PointLightBufferType* dataPtr3;
 
 	worldMatrix = XMMatrixTranspose(worldMatrix);
 	viewMatrix = XMMatrixTranspose(viewMatrix);
 	projectionMatrix = XMMatrixTranspose(projectionMatrix);
+	lightViewMatrix = XMMatrixTranspose(lightViewMatrix);
+	lightProjectionMatrix = XMMatrixTranspose(lightProjectionMatrix);
 
 	if (FAILED(deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) {
 		return false;
@@ -302,19 +358,23 @@ bool TerrainShaderClass::SetShaderParameters(
 	dataPtr->world = worldMatrix;
 	dataPtr->view = viewMatrix;
 	dataPtr->projection = projectionMatrix;
+	dataPtr->lightView = lightViewMatrix;
+	dataPtr->lightProjection = lightProjectionMatrix;
 
 	deviceContext->Unmap(m_matrixBuffer, 0);
 
 	bufferNumber = 0;
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
-	// Bind all 6 textures
-	ID3D11ShaderResourceView* textures[6] = {
+	// Bind all 7 textures including shadow map
+	ID3D11ShaderResourceView* textures[7] = {
 			texture, normalMap, normalMap2, normalMap3,
-			grassTexture, grassNormalMap
+			grassTexture, grassNormalMap, shadowMapTexture
 	};
-	deviceContext->PSSetShaderResources(0, 6, textures);
-	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
+	deviceContext->PSSetShaderResources(0, 7, textures);
+	
+	ID3D11SamplerState* samplers[2] = { m_sampleState, m_shadowSampleState };
+	deviceContext->PSSetSamplers(0, 2, samplers);
 
 	if (FAILED(deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) {
 		return false;
@@ -324,12 +384,29 @@ bool TerrainShaderClass::SetShaderParameters(
 
 	dataPtr2->diffuseColor = diffuseColor;
 	dataPtr2->lightDirection = lightDirection;
-	dataPtr2->padding = 0.0f;
+	dataPtr2->shadowMapBias = 0.001f;  // Shadow bias to prevent shadow acne
 
 	deviceContext->Unmap(m_lightBuffer, 0);
 
 	bufferNumber = 0;
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
+
+	if (FAILED(deviceContext->Map(m_pointLightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) {
+		return false;
+	}
+
+	dataPtr3 = (PointLightBufferType*)mappedResource.pData;
+	if (pointLights) {
+		*dataPtr3 = *pointLights;
+	}
+	else {
+		dataPtr3->numLights = 0;
+	}
+
+	deviceContext->Unmap(m_pointLightBuffer, 0);
+
+	bufferNumber = 1;
+	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_pointLightBuffer);
 
 	return true;
 }

@@ -34,6 +34,8 @@ public:
 	void DisableAlphaBlending();
 	void EnableWireframe();
 	void DisableWireframe();
+	void SetBackBufferRenderTarget();
+	void ResetViewport();
 private:
 	bool m_vsync_enabled;
 	int m_videoCardMemory;
@@ -55,6 +57,7 @@ private:
 	ID3D11BlendState* m_alphaEnableBlendingState;
 	ID3D11BlendState* m_alphaDisalbeBlendingState;
 	ID3D11BlendState* m_alphaEnableBlendingState2;
+	D3D11_VIEWPORT m_viewport;
 };
 
 #endif

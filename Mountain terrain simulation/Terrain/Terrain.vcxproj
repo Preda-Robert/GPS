@@ -147,7 +147,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DepthShaderClass.cpp" />
     <ClCompile Include="ObjectShaderClass.cpp" />
+    <ClCompile Include="ShadowMapClass.cpp" />
     <ClCompile Include="StaticObjectsClass.cpp" />
     <ClCompile Include="StreetCircuitClass.cpp" />
     <ClCompile Include="ApplicationClass.cpp" />
@@ -171,6 +173,7 @@
     <ClCompile Include="SkyboxShaderClass.cpp" />
     <ClCompile Include="SkyDomeClass.cpp" />
     <ClCompile Include="SkyDomeShaderClass.cpp" />
+    <ClCompile Include="StreetLightClass.cpp" />
     <ClCompile Include="SystemClass.cpp" />
     <ClCompile Include="TerrainCellClass.cpp" />
     <ClCompile Include="TerrainClass.cpp" />

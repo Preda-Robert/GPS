@@ -11,6 +11,11 @@ ZoneClass::ZoneClass()
 	m_Skybox = NULL;
 	m_Cubemap = NULL;
 	m_Terrain = NULL;
+	m_ShadowMap = NULL;
+	m_StreetLights = NULL;
+	for (int i = 0; i < 8; i++) {
+		m_StreetLightShadowMaps[i] = NULL;
+	}
 	m_StreetCircuit = NULL;
 	m_StaticObjects = NULL;
 	m_displayUI = false; // F1
@@ -35,6 +40,8 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 	m_Skybox = new SkyboxClass();
 	m_Cubemap = new CubemapClass();
 	m_Terrain = new TerrainClass();
+	m_ShadowMap = new ShadowMapClass();
+	m_StreetLights = new StreetLightClass();
 
 	m_StreetCircuit = new StreetCircuitClass();
 	if (!m_StreetCircuit || !m_StreetCircuit->Initialize(direct3D->GetDevice(),
@@ -81,7 +88,11 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 		!m_Skybox ||
 		!m_Cubemap ||
 		!m_Terrain ||
-		!m_UserInterface->Initialize(direct3D, screenHeight, screenWidth)
+		!m_ShadowMap ||
+		!m_StreetLights ||
+		!m_UserInterface->Initialize(direct3D, screenHeight, screenWidth) ||
+		!m_ShadowMap->Initialize(direct3D->GetDevice(), 2048, 2048) ||
+		!m_StreetLights->Initialize(direct3D->GetDevice())
 		) {
 		return false;
 	}
@@ -91,7 +102,29 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 	m_Camera->RenderBaseViewMatrix();
 
 	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light->SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
 	m_Light->SetDirection(-0.5f, -1.0f, -0.5f);
+	
+
+	float sceneCenter = 512.0f;
+	m_Light->SetPosition(sceneCenter + 200.0f, 400.0f, sceneCenter + 200.0f);
+	m_Light->SetLookAt(sceneCenter, 0.0f, sceneCenter);
+	m_Light->GenerateViewMatrix();
+	m_Light->GenerateProjectionMatrix(1000.0f, 1.0f);
+
+	XMFLOAT4 streetlightColor = XMFLOAT4(1.0f, 0.9f, 0.7f, 1.0f);
+	float lightRange = 50.0f;
+	float lightIntensity = 2.0f;
+	
+	m_StreetLights->AddStreetLight(XMFLOAT3(60.0f, 15.0f + 15.0f, offset + 128.0f), streetlightColor, lightRange, lightIntensity);
+	m_StreetLights->AddStreetLight(XMFLOAT3(196.0f, 15.0f + 15.0f, offset + 128.0f), streetlightColor, lightRange, lightIntensity);
+	
+	for (int i = 0; i < m_StreetLights->GetLightCount() && i < 8; i++) {
+		m_StreetLightShadowMaps[i] = new ShadowMapClass();
+		if (!m_StreetLightShadowMaps[i]->Initialize(direct3D->GetDevice(), 1024, 1024)) {
+			return false;
+		}
+	}
 
 	//m_Position->SetPosition(16.0f, 78.0f, 565.0f);
 	//m_Position->SetRotation(13.0f, 89.0f, 0.0f);
@@ -135,6 +168,26 @@ void ZoneClass::Shutdown()
 		m_Terrain->Shutdown();
 		delete m_Terrain;
 		m_Terrain = NULL;
+	}
+
+	if (m_ShadowMap) {
+		m_ShadowMap->Shutdown();
+		delete m_ShadowMap;
+		m_ShadowMap = NULL;
+	}
+
+	for (int i = 0; i < 8; i++) {
+		if (m_StreetLightShadowMaps[i]) {
+			m_StreetLightShadowMaps[i]->Shutdown();
+			delete m_StreetLightShadowMaps[i];
+			m_StreetLightShadowMaps[i] = NULL;
+		}
+	}
+
+	if (m_StreetLights) {
+		m_StreetLights->Shutdown();
+		delete m_StreetLights;
+		m_StreetLights = NULL;
 	}
 
 	if (m_Cubemap) {
@@ -281,12 +334,55 @@ void ZoneClass::HandleMovementInput(InputClass* input, float frameTime)
 	return;
 }
 
+bool ZoneClass::RenderShadowMap(D3DClass* direct3D, ShaderManagerClass* shaderManager)
+{
+	XMMATRIX worldMatrix, lightViewMatrix, lightProjectionMatrix;
+	
+	m_Light->GetViewMatrix(lightViewMatrix);
+	m_Light->GetProjectionMatrix(lightProjectionMatrix);
+	direct3D->GetWorldMatrix(worldMatrix);
+	
+	m_ShadowMap->SetRenderTarget(direct3D->GetDeviceContext());
+	m_ShadowMap->ClearRenderTarget(direct3D->GetDeviceContext());
+	
+	for (int i = 0; i < m_Terrain->GetCellCount(); ++i) {
+		m_Terrain->RenderCellForShadow(direct3D->GetDeviceContext(), i);
+		shaderManager->RenderDepthShader(
+			direct3D->GetDeviceContext(),
+			m_Terrain->GetCellIndexCount(i),
+			worldMatrix,
+			lightViewMatrix,
+			lightProjectionMatrix
+		);
+	}
+	
+	for (int i = 0; i < m_StaticObjects->GetObjectCount(); i++) {
+		XMMATRIX objectWorld = m_StaticObjects->GetObjectWorldMatrix(i);
+		m_StaticObjects->Render(direct3D->GetDeviceContext(), i);
+		shaderManager->RenderDepthShader(
+			direct3D->GetDeviceContext(),
+			m_StaticObjects->GetIndexCount(i),
+			objectWorld,
+			lightViewMatrix,
+			lightProjectionMatrix
+		);
+	}
+	
+	direct3D->SetBackBufferRenderTarget();
+	direct3D->ResetViewport();
+	
+	return true;
+}
+
 bool ZoneClass::Render(D3DClass* direct3D, ShaderManagerClass* shaderManager, TextureManagerClass* textureManager)
 {
 	XMMATRIX worldMatrix, viewMatrix, projectionMatrix, baseViewMatrix, orthoMatrix;
+	XMMATRIX lightViewMatrix, lightProjectionMatrix;
 	XMFLOAT3 cameraPosition;
 	bool result;
 	int i;
+
+	RenderShadowMap(direct3D, shaderManager);
 
 	m_Camera->Render();
 
@@ -295,6 +391,8 @@ bool ZoneClass::Render(D3DClass* direct3D, ShaderManagerClass* shaderManager, Te
 	direct3D->GetProjectionMatrix(projectionMatrix);
 	m_Camera->GetBaseViewMatrix(baseViewMatrix);
 	direct3D->GetOrthoMatrix(orthoMatrix);
+	m_Light->GetViewMatrix(lightViewMatrix);
+	m_Light->GetProjectionMatrix(lightProjectionMatrix);
 
 	cameraPosition = m_Camera->GetPosition();
 
@@ -330,6 +428,19 @@ bool ZoneClass::Render(D3DClass* direct3D, ShaderManagerClass* shaderManager, Te
 		direct3D->EnableWireframe();
 	}
 
+	TerrainShaderClass::PointLightBufferType pointLightBuffer;
+	int lightCount = m_StreetLights->GetLightCount();
+	pointLightBuffer.numLights = lightCount;
+	pointLightBuffer.padding = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+	for (int li = 0; li < lightCount && li < MAX_POINT_LIGHTS; li++) {
+		StreetLightData* light = m_StreetLights->GetLightData(li);
+		pointLightBuffer.positions[li] = XMFLOAT4(light->position.x, light->position.y, light->position.z, light->range);
+		pointLightBuffer.colors[li] = XMFLOAT4(light->color.x, light->color.y, light->color.z, light->intensity);
+		pointLightBuffer.attenuation[li] = XMFLOAT4(light->constantAttenuation, light->linearAttenuation, 
+			light->quadraticAttenuation, light->enabled ? 1.0f : 0.0f);
+	}
+
 	for (i = 0; i < m_Terrain->GetCellCount(); ++i) {
 		if (m_Terrain->RenderCell(direct3D->GetDeviceContext(), i, m_Frustum)) {
 			result = shaderManager->RenderTerrainShader(
@@ -338,14 +449,18 @@ bool ZoneClass::Render(D3DClass* direct3D, ShaderManagerClass* shaderManager, Te
 				worldMatrix,
 				viewMatrix,
 				projectionMatrix,
+				lightViewMatrix,
+				lightProjectionMatrix,
 				textureManager->GetTexture(0),
 				textureManager->GetTexture(1),
 				textureManager->GetTexture(2),
 				textureManager->GetTexture(3),
 				textureManager->GetTexture(4),
 				textureManager->GetTexture(5),
+				m_ShadowMap->GetShaderResourceView(),
 				m_Light->GetDirection(),
-				m_Light->GetDiffuseColor()
+				m_Light->GetDiffuseColor(),
+				&pointLightBuffer
 			);
 
 			if (!result) {
