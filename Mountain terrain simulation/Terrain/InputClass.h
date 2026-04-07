@@ -33,6 +33,11 @@ public:
 	bool IsF3Toggled();
 	bool IsF4Toggled();
 	bool IsF5Toggled();
+	// Controllable object keys (I, J, K, L)
+	bool IsIPressed();
+	bool IsJPressed();
+	bool IsKPressed();
+	bool IsLPressed();
 private:
 	bool ReadKeyboard();
 	bool ReadMouse();

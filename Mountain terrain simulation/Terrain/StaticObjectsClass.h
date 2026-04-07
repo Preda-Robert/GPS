@@ -51,6 +51,16 @@ public:
     ObjectType GetObjectType(int objectIndex);
     XMMATRIX GetObjectWorldMatrix(int objectIndex);
 
+    // Bounding box for collision detection
+    struct BoundingBox
+    {
+        XMFLOAT3 min;
+        XMFLOAT3 max;
+    };
+    BoundingBox GetObjectBoundingBox(int objectIndex);
+    XMFLOAT3 GetObjectPosition(int objectIndex);
+    XMFLOAT3 GetObjectScale(int objectIndex);
+
 private:
     bool CreateBuildingBuffers(ID3D11Device* device, ObjectBuffers& buffers);
     bool CreateTreeBuffers(ID3D11Device* device, ObjectBuffers& buffers);

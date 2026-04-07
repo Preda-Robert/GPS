@@ -480,3 +480,48 @@ XMMATRIX StaticObjectsClass::GetObjectWorldMatrix(int objectIndex)
 
     return scale * rotation * translation;
 }
+
+StaticObjectsClass::BoundingBox StaticObjectsClass::GetObjectBoundingBox(int objectIndex)
+{
+    BoundingBox box;
+    box.min = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    box.max = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+    if (objectIndex < 0 || objectIndex >= (int)m_objects.size())
+        return box;
+
+    const StaticObject& obj = m_objects[objectIndex];
+
+
+    float halfWidth = 0.5f * obj.scale.x;
+    float height = 1.0f * obj.scale.y;
+    float halfDepth = 0.5f * obj.scale.z;
+
+    if (obj.type == BARRIER)
+    {
+        halfWidth = 1.0f * obj.scale.x;
+        height = 0.3f * obj.scale.y;
+        halfDepth = 0.1f * obj.scale.z;
+    }
+
+    box.min = XMFLOAT3(obj.position.x - halfWidth, obj.position.y, obj.position.z - halfDepth);
+    box.max = XMFLOAT3(obj.position.x + halfWidth, obj.position.y + height, obj.position.z + halfDepth);
+
+    return box;
+}
+
+XMFLOAT3 StaticObjectsClass::GetObjectPosition(int objectIndex)
+{
+    if (objectIndex < 0 || objectIndex >= (int)m_objects.size())
+        return XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+    return m_objects[objectIndex].position;
+}
+
+XMFLOAT3 StaticObjectsClass::GetObjectScale(int objectIndex)
+{
+    if (objectIndex < 0 || objectIndex >= (int)m_objects.size())
+        return XMFLOAT3(1.0f, 1.0f, 1.0f);
+
+    return m_objects[objectIndex].scale;
+}

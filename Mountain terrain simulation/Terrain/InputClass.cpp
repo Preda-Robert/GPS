@@ -268,6 +268,38 @@ bool InputClass::IsF5Toggled()
 	return false;
 }
 
+bool InputClass::IsIPressed()
+{
+	if (m_keyboardState[DIK_I] & 0x80) {
+		return true;
+	}
+	return false;
+}
+
+bool InputClass::IsJPressed()
+{
+	if (m_keyboardState[DIK_J] & 0x80) {
+		return true;
+	}
+	return false;
+}
+
+bool InputClass::IsKPressed()
+{
+	if (m_keyboardState[DIK_K] & 0x80) {
+		return true;
+	}
+	return false;
+}
+
+bool InputClass::IsLPressed()
+{
+	if (m_keyboardState[DIK_L] & 0x80) {
+		return true;
+	}
+	return false;
+}
+
 bool InputClass::ReadKeyboard()
 {
 	HRESULT result = m_keyboard->GetDeviceState(sizeof(m_keyboardState), (LPVOID)&m_keyboardState);

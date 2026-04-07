@@ -152,6 +152,7 @@
     <ClCompile Include="ShadowMapClass.cpp" />
     <ClCompile Include="StaticObjectsClass.cpp" />
     <ClCompile Include="StreetCircuitClass.cpp" />
+    <ClCompile Include="ControllableObjectClass.cpp" />
     <ClCompile Include="ApplicationClass.cpp" />
     <ClCompile Include="BitmapClass.cpp" />
     <ClCompile Include="CameraClass.cpp" />
@@ -190,6 +191,7 @@
     <ClInclude Include="ObjectShaderClass.h" />
     <ClInclude Include="StaticObjectsClass.h" />
     <ClInclude Include="StreetCircuitClass.h" />
+    <ClInclude Include="ControllableObjectClass.h" />
     <ClInclude Include="ApplicationClass.h" />
     <ClInclude Include="BitmapClass.h" />
     <ClInclude Include="CameraClass.h" />

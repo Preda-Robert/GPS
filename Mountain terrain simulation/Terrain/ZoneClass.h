@@ -19,6 +19,7 @@
 #include "StaticObjectsClass.h"
 #include "ShadowMapClass.h"
 #include "StreetLightClass.h"
+#include "ControllableObjectClass.h"
 
 class ZoneClass
 {
@@ -31,6 +32,7 @@ public:
 
 private:
 	void HandleMovementInput(InputClass*, float);
+	void HandleControllableObjectInput(InputClass*, float);
 	void PushedF3Button(float);
 	bool RenderShadowMap(D3DClass*, ShaderManagerClass*);
 	bool Render(D3DClass*, ShaderManagerClass*, TextureManagerClass*);
@@ -47,7 +49,7 @@ private:
 	TerrainClass* m_Terrain;
 	ShadowMapClass* m_ShadowMap;
 	StreetLightClass* m_StreetLights;
-	ShadowMapClass* m_StreetLightShadowMaps[8]; 
+	ShadowMapClass* m_StreetLightShadowMaps[8];  // One shadow map per streetlight
 	bool m_displayUI;
 	bool m_wireFrame;
 	bool m_play;
@@ -55,6 +57,7 @@ private:
 	bool m_heightLocked;
 	StreetCircuitClass* m_StreetCircuit;
 	StaticObjectsClass* m_StaticObjects;
+	ControllableObjectClass* m_ControllableObject;
 };
 
 #endif

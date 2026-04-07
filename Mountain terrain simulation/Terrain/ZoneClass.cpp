@@ -18,6 +18,7 @@ ZoneClass::ZoneClass()
 	}
 	m_StreetCircuit = NULL;
 	m_StaticObjects = NULL;
+	m_ControllableObject = NULL;
 	m_displayUI = false; // F1
 	m_wireFrame = false; // F2
 	m_play = false; // F3
@@ -78,6 +79,13 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 
 	m_StaticObjects->AddObject(StaticObjectsClass::CONE, 70.0f, 15.0f, offset + 80.0f, 3.0f, 3.0f, 3.0f, 0.0f);
 	m_StaticObjects->AddObject(StaticObjectsClass::CONE, 186.0f, 15.0f, offset + 176.0f, 3.0f, 3.0f, 3.0f, 0.0f);
+
+	m_ControllableObject = new ControllableObjectClass();
+	if (!m_ControllableObject || !m_ControllableObject->Initialize(direct3D->GetDevice(), ControllableObjectClass::PEDESTRIAN))
+	{
+		return false;
+	}
+	m_ControllableObject->SetPosition(128.0f, 15.0f, offset + 128.0f);
 
 	if (!m_UserInterface ||
 		!m_Camera ||
@@ -151,6 +159,13 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 
 void ZoneClass::Shutdown()
 {
+	if (m_ControllableObject)
+	{
+		m_ControllableObject->Shutdown();
+		delete m_ControllableObject;
+		m_ControllableObject = NULL;
+	}
+
 	if (m_StaticObjects)
 	{
 		m_StaticObjects->Shutdown();
@@ -242,6 +257,7 @@ bool ZoneClass::Frame(D3DClass* direct3D, InputClass* input, ShaderManagerClass*
 	float posX, posY, posZ, rotX, rotY, rotZ, height;
 
 	HandleMovementInput(input, frameTime);
+	HandleControllableObjectInput(input, frameTime);
 
 	m_Position->GetPosition(posX, posY, posZ);
 	m_Position->GetRotation(rotX, rotY, rotZ);
@@ -330,6 +346,38 @@ void ZoneClass::HandleMovementInput(InputClass* input, float frameTime)
 	if (input->IsF5Toggled()) {
 		m_heightLocked = !m_heightLocked;
 	}
+
+	return;
+}
+
+void ZoneClass::HandleControllableObjectInput(InputClass* input, float frameTime)
+{
+	bool keyDown;
+	float objX, objY, objZ;
+	float terrainHeight;
+
+	m_ControllableObject->SetFrameTime(frameTime);
+
+	keyDown = input->IsIPressed();
+	m_ControllableObject->MoveForward(keyDown);
+
+	keyDown = input->IsKPressed();
+	m_ControllableObject->MoveBackward(keyDown);
+
+	keyDown = input->IsJPressed();
+	m_ControllableObject->TurnLeft(keyDown);
+
+	keyDown = input->IsLPressed();
+	m_ControllableObject->TurnRight(keyDown);
+
+	m_ControllableObject->GetPosition(objX, objY, objZ);
+	
+	if (!m_Terrain->GetHeightAtPosition(objX, objZ, terrainHeight))
+	{
+		terrainHeight = objY;
+	}
+
+	m_ControllableObject->Update(m_StaticObjects, terrainHeight);
 
 	return;
 }
@@ -514,6 +562,34 @@ bool ZoneClass::Render(D3DClass* direct3D, ShaderManagerClass* shaderManager, Te
 			direct3D->GetDeviceContext(),
 			m_StaticObjects->GetIndexCount(i),
 			objectWorld,
+			viewMatrix,
+			projectionMatrix,
+			textureManager->GetTexture(textureIndex),
+			m_Light->GetDirection(),
+			m_Light->GetDiffuseColor()
+		);
+		if (!result) return false;
+	}
+
+	{
+		XMMATRIX ctrlObjWorld = m_ControllableObject->GetWorldMatrix();
+		m_ControllableObject->Render(direct3D->GetDeviceContext());
+		
+		
+		int textureIndex = 7;
+		if (m_ControllableObject->GetObjectType() == ControllableObjectClass::CAR)
+		{
+			textureIndex = 7; 
+		}
+		else
+		{
+			textureIndex = 9;
+		}
+
+		result = shaderManager->RenderObjectShader(
+			direct3D->GetDeviceContext(),
+			m_ControllableObject->GetIndexCount(),
+			ctrlObjWorld,
 			viewMatrix,
 			projectionMatrix,
 			textureManager->GetTexture(textureIndex),
