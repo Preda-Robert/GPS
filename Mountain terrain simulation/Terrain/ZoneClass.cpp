@@ -19,6 +19,7 @@ ZoneClass::ZoneClass()
 	m_StreetCircuit = NULL;
 	m_StaticObjects = NULL;
 	m_ControllableObject = NULL;
+	m_MovingObjects = NULL;
 	m_displayUI = false; // F1
 	m_wireFrame = false; // F2
 	m_play = false; // F3
@@ -81,11 +82,31 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 	m_StaticObjects->AddObject(StaticObjectsClass::CONE, 186.0f, 15.0f, offset + 176.0f, 3.0f, 3.0f, 3.0f, 0.0f);
 
 	m_ControllableObject = new ControllableObjectClass();
-	if (!m_ControllableObject || !m_ControllableObject->Initialize(direct3D->GetDevice(), ControllableObjectClass::PEDESTRIAN))
+	if (!m_ControllableObject || !m_ControllableObject->Initialize(direct3D->GetDevice(), ControllableObjectClass::CAR))
 	{
 		return false;
 	}
 	m_ControllableObject->SetPosition(128.0f, 15.0f, offset + 128.0f);
+
+	m_MovingObjects = new MovingObjectsClass();
+	if (!m_MovingObjects || !m_MovingObjects->Initialize(direct3D->GetDevice()))
+	{
+		return false;
+	}
+	
+	m_MovingObjects->AddRandomMover(100.0f, 17.0f, offset + 100.0f, 2.0f, MovingObjectsClass::SPHERE, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), 15.0f);
+	m_MovingObjects->AddRandomMover(150.0f, 17.0f, offset + 150.0f, 1.5f, MovingObjectsClass::CUBE, XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), 20.0f);
+	m_MovingObjects->AddRandomMover(80.0f, 17.0f, offset + 180.0f, 2.5f, MovingObjectsClass::SPHERE, XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), 12.0f);
+
+
+	m_MovingObjects->AddBouncingObject(120.0f, 17.0f, offset + 80.0f, 2.0f, MovingObjectsClass::SPHERE, XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f), 10.0f, 8.0f);
+	m_MovingObjects->AddBouncingObject(140.0f, 17.0f, offset + 90.0f, 1.8f, MovingObjectsClass::SPHERE, XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f), 15.0f, 12.0f);
+
+	m_MovingObjects->AddCircularMover(128.0f, 20.0f, offset + 128.0f, 20.0f, 2.0f, MovingObjectsClass::CUBE, XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f), 1.0f);
+
+	m_MovingObjects->AddPatrolMover(128.0f, 17.0f, offset + 60.0f, 1.5f, MovingObjectsClass::SPHERE, XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f), 30.0f, 10.0f);
+
+	m_MovingObjects->AddSineWaveMover(60.0f, 18.0f, offset + 128.0f, 1.8f, MovingObjectsClass::CUBE, XMFLOAT4(0.5f, 0.0f, 1.0f, 1.0f), 8.0f, 2.0f, 15.0f);
 
 	if (!m_UserInterface ||
 		!m_Camera ||
@@ -159,6 +180,13 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 
 void ZoneClass::Shutdown()
 {
+	if (m_MovingObjects)
+	{
+		m_MovingObjects->Shutdown();
+		delete m_MovingObjects;
+		m_MovingObjects = NULL;
+	}
+
 	if (m_ControllableObject)
 	{
 		m_ControllableObject->Shutdown();
@@ -593,6 +621,24 @@ bool ZoneClass::Render(D3DClass* direct3D, ShaderManagerClass* shaderManager, Te
 			viewMatrix,
 			projectionMatrix,
 			textureManager->GetTexture(textureIndex),
+			m_Light->GetDirection(),
+			m_Light->GetDiffuseColor()
+		);
+		if (!result) return false;
+	}
+
+	for (int i = 0; i < m_MovingObjects->GetObjectCount(); i++)
+	{
+		XMMATRIX movingObjWorld = m_MovingObjects->GetObjectWorldMatrix(i);
+		m_MovingObjects->Render(direct3D->GetDeviceContext(), i);
+
+		result = shaderManager->RenderObjectShader(
+			direct3D->GetDeviceContext(),
+			m_MovingObjects->GetIndexCount(i),
+			movingObjWorld,
+			viewMatrix,
+			projectionMatrix,
+			textureManager->GetTexture(7), 
 			m_Light->GetDirection(),
 			m_Light->GetDiffuseColor()
 		);

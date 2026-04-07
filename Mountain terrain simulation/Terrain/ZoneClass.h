@@ -20,6 +20,7 @@
 #include "ShadowMapClass.h"
 #include "StreetLightClass.h"
 #include "ControllableObjectClass.h"
+#include "MovingObjectsClass.h"
 
 class ZoneClass
 {
@@ -58,6 +59,7 @@ private:
 	StreetCircuitClass* m_StreetCircuit;
 	StaticObjectsClass* m_StaticObjects;
 	ControllableObjectClass* m_ControllableObject;
+	MovingObjectsClass* m_MovingObjects;
 };
 
 #endif
