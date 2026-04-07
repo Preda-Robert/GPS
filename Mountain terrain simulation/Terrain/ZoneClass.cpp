@@ -94,17 +94,15 @@ bool ZoneClass::Initialize(D3DClass* direct3D, HWND hwnd, int screenWidth, int s
 		return false;
 	}
 	
-	m_MovingObjects->AddRandomMover(100.0f, 17.0f, offset + 100.0f, 2.0f, MovingObjectsClass::SPHERE, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), 15.0f);
+	m_MovingObjects->AddRandomMover(100.0f, 17.0f, offset + 100.0f, 2.0f, MovingObjectsClass::CUBE, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), 15.0f);
 	m_MovingObjects->AddRandomMover(150.0f, 17.0f, offset + 150.0f, 1.5f, MovingObjectsClass::CUBE, XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), 20.0f);
-	m_MovingObjects->AddRandomMover(80.0f, 17.0f, offset + 180.0f, 2.5f, MovingObjectsClass::SPHERE, XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), 12.0f);
+	m_MovingObjects->AddRandomMover(80.0f, 17.0f, offset + 180.0f, 2.5f, MovingObjectsClass::CUBE, XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), 12.0f);
 
 
 	m_MovingObjects->AddBouncingObject(120.0f, 17.0f, offset + 80.0f, 2.0f, MovingObjectsClass::SPHERE, XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f), 10.0f, 8.0f);
 	m_MovingObjects->AddBouncingObject(140.0f, 17.0f, offset + 90.0f, 1.8f, MovingObjectsClass::SPHERE, XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f), 15.0f, 12.0f);
 
 	m_MovingObjects->AddCircularMover(128.0f, 20.0f, offset + 128.0f, 20.0f, 2.0f, MovingObjectsClass::CUBE, XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f), 1.0f);
-
-	m_MovingObjects->AddPatrolMover(128.0f, 17.0f, offset + 60.0f, 1.5f, MovingObjectsClass::SPHERE, XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f), 30.0f, 10.0f);
 
 	if (!m_UserInterface ||
 		!m_Camera ||
@@ -284,6 +282,8 @@ bool ZoneClass::Frame(D3DClass* direct3D, InputClass* input, ShaderManagerClass*
 
 	HandleMovementInput(input, frameTime);
 	HandleControllableObjectInput(input, frameTime);
+
+	m_MovingObjects->Update(frameTime, 30.0f, 220.0f, 300.0f, 480.0f);
 
 	m_Position->GetPosition(posX, posY, posZ);
 	m_Position->GetRotation(rotX, rotY, rotZ);
